@@ -13,6 +13,7 @@ from sklearn.metrics import (
     recall_score,
     roc_auc_score,
 )
+from sklearn.model_selection import GridSearchCV
 
 import seaborn as sns
 import matplotlib.pyplot as plt
@@ -75,7 +76,7 @@ X_train, X_test, y_train, y_test = train_test_split(
     stratify=df["LEVEL_"],
 )
 
-# Definição do algorítimo utilizado: KNC
+# Definição do algorítimo utilizado: KNN
 pipeline = Pipeline([
     ('scaler', StandardScaler()),
     ('clf', KNeighborsClassifier())
@@ -92,6 +93,16 @@ random_search = RandomizedSearchCV(estimator=pipeline, param_distributions=param
 random_search.fit(X_train, y_train)
 print("Best hyperparameters:", random_search.best_params_)
 
-# Imprime a acurácia do algorítimo
+# Imprime a acurácia do algorítimo, avaliando o modelo
 accuracy = random_search.score(X_test, y_test)
 print("Accuracy on test set:", accuracy)
+
+grid_search = GridSearchCV(pipeline, param_grid=param_grid, n_jobs=-1)
+grid_search.fit(X_train, y_train)
+
+test_score(X_test, y_test, grid_search, "Best Model")
+
+# Imprime a matriz de confusão, ao comparar com os dados de teste, avaliando o resultado
+confusion_matrix_(
+    X_test, y_test, grid_search, "Best Model"
+)
